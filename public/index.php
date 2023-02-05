@@ -10,13 +10,17 @@ $customerModel = new App\Models\Customer('dima', 'tarasov');
 
 //var_dump($customerModel);
 
-$bankService = new App\Services\Bank($bankModel);
+$bankService = new App\Services\BankService($bankModel);
 $account = $bankService->createAccount($customerModel);
-$account->addCurrency(new \App\Models\RUB);
-$account->addCurrency(new \App\Models\EUR);
-//$account->setMainCurrency(new \App\Models\RUB);
-$account->deposit(new \App\Models\RUB(100));
-var_dump($account->getDeposit());
+$bankService->accountService->addCurrency(new \App\Models\RUB);
+var_dump($bankService->);
+
+//try {
+//    $account->getDeposit(new \App\Models\EUR);
+//} catch (App\Exceptions\CurrencyDoesNotExistInAccountException $e) {
+//    var_dump($e->getMessage());
+//}
+var_dump($account->removeCurrency(new \App\Models\USD));
 
 
 

@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Account as AccountModel;
 use App\Models\Bank as BankModel;
+use App\Models\Currency as CurrencyModel;
 use App\Models\Customer as CustomerModel;
-class Bank
+use App\Services\AccountService;
+class BankService
 {
     private array $accounts = [
 
@@ -17,11 +19,12 @@ class Bank
         $this->bank = $bank;
     }
 
-    public function createAccount(CustomerModel $customer): AccountModel
+    public function createAccount(CustomerModel $customer, AccountService $accountService): AccountModel
     {
-        $account = new AccountModel($customer);
+        $account = new AccountModel($customer, $this->bank);
         $this->accounts[$customer->id][] = $account;
-        return $account;
+        $this->accountService = $accountService;
+        return $this->accountService;
     }
 
     public function getAllAccountUser(CustomerModel $customer): array

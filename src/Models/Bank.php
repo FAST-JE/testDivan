@@ -14,8 +14,8 @@ class Bank
         Currency::USD . "/" . Currency::EUR => 1.1,
         Currency::EUR . "/" . Currency::RUB => 110,
         Currency::EUR . "/" . Currency::USD => 1.1,
-        Currency::RUB . "/" . Currency::USD => 110,
-        Currency::RUB . "/" . Currency::EUR => 120,
+        Currency::RUB . "/" . Currency::USD => 0.01,
+        Currency::RUB . "/" . Currency::EUR => 0.01,
     ];
 
 
