@@ -2,24 +2,30 @@
 
 namespace App\Services;
 
+use App\Models\Account as AccountModel;
+use App\Models\Bank as BankModel;
+use App\Models\Customer as CustomerModel;
 class Bank
 {
-    private $account;
+    private array $accounts = [
+
+    ];
     private $bank;
 
-    public function __construct(App\Services\Account $account, App\Models\Bank $bank)
+    public function __construct(BankModel $bank)
     {
-        $this->account = $account;
         $this->bank = $bank;
     }
 
-    public function createAccount()
+    public function createAccount(CustomerModel $customer): AccountModel
     {
-
+        $account = new AccountModel($customer);
+        $this->accounts[$customer->id][] = $account;
+        return $account;
     }
 
-    public function setExchange(App\Models\Currency $fc, App\Models\Currency $sc): void
+    public function getAllAccountUser(CustomerModel $customer): array
     {
-
+        return $this->accounts[$customer->id];
     }
 }
