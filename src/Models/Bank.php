@@ -2,34 +2,50 @@
 
 namespace App\Models;
 
-use App\Enums\Currency;
 use App\Exceptions\CurrencyPairDoesNotExistException;
+use App\Models\Account as AccountModel;
+use App\Models\Customer as CustomerModel;
+use App\Models\Currency as CurrencyModel;
+use App\Enums\Currency as CurrencyEnum;
 
 class Bank
 {
-    public string $name;
+
+    private array $accounts = [
+
+    ];
 
     public array $exchangeRates = [
-        Currency::USD . "/" . Currency::RUB => 100,
-        Currency::USD . "/" . Currency::EUR => 1.1,
-        Currency::EUR . "/" . Currency::RUB => 110,
-        Currency::EUR . "/" . Currency::USD => 1.1,
-        Currency::RUB . "/" . Currency::USD => 0.01,
-        Currency::RUB . "/" . Currency::EUR => 0.01,
+        CurrencyEnum::USD . "/" . CurrencyEnum::RUB => 100,
+        CurrencyEnum::USD . "/" . CurrencyEnum::EUR => 1.1,
+        CurrencyEnum::EUR . "/" . CurrencyEnum::RUB => 110,
+        CurrencyEnum::EUR . "/" . CurrencyEnum::USD => 1.1,
+        CurrencyEnum::RUB . "/" . CurrencyEnum::USD => 0.01,
+        CurrencyEnum::RUB . "/" . CurrencyEnum::EUR => 0.01,
     ];
 
 
-    public function setExchange(string $fc, string $sc, float $rate): void
+    public function setExchange(CurrencyModel $fc, CurrencyModel $sc, float $rate): void
     {
-        if (!isset($this->exchangeRates[$fc . '/' . $sc]))
+        $key = $fc->name . '/' . $sc->name;
+        if (!isset($this->exchangeRates[$key])) {
             throw new CurrencyPairDoesNotExistException();
+        }
 
-        $this->exchangeRates[$fc . '/' . $sc] = $rate;
+        $this->exchangeRates[$key] = $rate;
         return;
     }
 
-//    public function getExchange(string $fc, string $sc, float $rate): void
-//    {
-//
-//    }
+
+    public function createAccount(CustomerModel $customer): AccountModel
+    {
+        $account = new AccountModel($customer);
+        $this->accounts[$customer->id][] = $account;
+        return $account;
+    }
+
+    public function getAllAccountUser(CustomerModel $customer): array
+    {
+        return $this->accounts[$customer->id];
+    }
 }
