@@ -15,26 +15,26 @@ class Bank
 
     ];
 
-    public array $exchangeRates = [
-        CurrencyEnum::USD . "/" . CurrencyEnum::RUB => 100,
-        CurrencyEnum::USD . "/" . CurrencyEnum::EUR => 1.1,
-        CurrencyEnum::EUR . "/" . CurrencyEnum::RUB => 110,
-        CurrencyEnum::EUR . "/" . CurrencyEnum::USD => 1.1,
-        CurrencyEnum::RUB . "/" . CurrencyEnum::USD => 0.01,
-        CurrencyEnum::RUB . "/" . CurrencyEnum::EUR => 0.01,
-    ];
-
-
-    public function setExchange(CurrencyModel $fc, CurrencyModel $sc, float $rate): void
-    {
-        $key = $fc->name . '/' . $sc->name;
-        if (!isset($this->exchangeRates[$key])) {
-            throw new CurrencyPairDoesNotExistException();
-        }
-
-        $this->exchangeRates[$key] = $rate;
-        return;
-    }
+//    public array $exchangeRates = [
+//        CurrencyEnum::USD . "/" . CurrencyEnum::RUB => 100,
+//        CurrencyEnum::USD . "/" . CurrencyEnum::EUR => 1.1,
+//        CurrencyEnum::EUR . "/" . CurrencyEnum::RUB => 110,
+//        CurrencyEnum::EUR . "/" . CurrencyEnum::USD => 1.1,
+//        CurrencyEnum::RUB . "/" . CurrencyEnum::USD => 0.01,
+//        CurrencyEnum::RUB . "/" . CurrencyEnum::EUR => 0.01,
+//    ];
+//
+//
+//    public function setExchange(CurrencyModel $fc, CurrencyModel $sc, float $rate): void
+//    {
+//        $key = $fc->name . '/' . $sc->name;
+//        if (!isset($this->exchangeRates[$key])) {
+//            throw new CurrencyPairDoesNotExistException();
+//        }
+//
+//        $this->exchangeRates[$key] = $rate;
+//        return;
+//    }
 
 
     public function createAccount(CustomerModel $customer): AccountModel
