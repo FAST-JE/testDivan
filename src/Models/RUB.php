@@ -7,13 +7,13 @@ use App\Exceptions\CurrencyPairDoesNotExistException;
 use App\Models\Currency as CurrencyModel;
 class RUB extends Currency
 {
-    public array $exchangeRates = [
-        CurrencyEnum::EUR => 0.01,
-        CurrencyEnum::USD => 0.01,
-    ];
-
     public function __construct(float|CurrencyModel $value = 0)
     {
+        $this->exchangeRates = [
+            CurrencyEnum::EUR => 110,
+            CurrencyEnum::USD => 100,
+        ];
+
         $this->name = CurrencyEnum::RUB;
         $amount = $value;
 
@@ -22,19 +22,5 @@ class RUB extends Currency
         }
 
         $this->value = (string)$amount;
-    }
-
-    public function setExchange(CurrencyModel $currency, float $rate): void
-    {
-        if (!isset($this->exchangeRates[$currency->name]))
-            throw new CurrencyPairDoesNotExistException();
-
-        $this->exchangeRates[$currency->name] = $rate;
-        return;
-    }
-
-    private function convertTo(CurrencyModel $currency): string
-    {
-        return (string)((float)$currency->value * (float)$this->exchangeRates[$currency->name]);
     }
 }

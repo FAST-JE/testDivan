@@ -3,40 +3,67 @@
 namespace App\Models;
 
 use App\Exceptions\AmountWithdrawShouldNotZeroException;
+use App\Exceptions\BaseCurrencyNotSet;
 use App\Exceptions\CurrencyDoesNotExistInAccountException;
 use App\Exceptions\CurrencyExistInAccountException;
 use App\Exceptions\CurrencyRemoveException;
 use App\Exceptions\InsufficientFundsException;
 use App\Models\Customer as CustomerModel;
 use App\Models\Currency as CurrencyModel;
-use App\Models\Bank as BankModel;
 
 class Account
 {
-    public string $id;
-    public null|CurrencyModel $currency = null;
-    public array $currencyToMoneyAmount = [
+    /**
+     * @var string
+     */
+    public readonly string $id;
+    /**
+     * @var Currency|null
+     */
+    private null|CurrencyModel $currency = null;
+    /**
+     * @var array
+     */
+    private array $currencyToMoneyAmount = [];
+    /**
+     * @var array
+     */
+    private array $currencyToClass = [];
+    /**
+     * @var Customer
+     */
+    private CustomerModel $customer;
 
-    ];
-    public CustomerModel $customer;
-    public BankModel $boundBank;
-
+    /**
+     * @param Customer $customer
+     */
     public function __construct(CustomerModel $customer)
     {
         $this->id = uniqid();
         $this->customer = $customer;
     }
 
+    /**
+     * @param Currency $currency
+     * @return void
+     */
     public function addCurrency(CurrencyModel $currency): void
     {
-        if (in_array($currency, $this->currencyToMoneyAmount, false)) {
-            throw new CurrencyExistInAccountException();
+        if (!in_array($currency->name, $this->currencyToMoneyAmount, true)) {
+            $this->currencyToMoneyAmount[$currency->name] = '0';
         }
-
-        $this->currencyToMoneyAmount[$currency->name] = '0';
+        if (!in_array($currency->name, $this->currencyToClass, true)) {
+            $this->currencyToClass[$currency->name] = $currency::class;
+        }
         return;
     }
 
+    /**
+     * @param Currency $currency
+     * @return void
+     * @throws CurrencyDoesNotExistInAccountException
+     * @throws CurrencyRemoveException
+     */
     public function removeCurrency(CurrencyModel $currency): void
     {
         $this->checkCurrencyExist($currency);
@@ -45,31 +72,46 @@ class Account
             throw new CurrencyRemoveException('Main currency cannot be removed');
         }
 
-        $classFirstCurrency = get_class($currency);
-        $value = new $classFirstCurrency($this->currencyToMoneyAmount[$currency->name]);
-        $classSecondCurrency = get_class($this->currency);
-        $toCurrency = $classSecondCurrency($value);
+        $currency->setValue($this->currencyToMoneyAmount[$currency->name]);
+
+        $toCurrency = new $this->currencyToClass[$this->currency->name]($currency);
+
         $this->currencyToMoneyAmount[$this->currency->name] = (string)((float)$this->currencyToMoneyAmount[$this->currency->name] + (float)$toCurrency->value);
-        array_splice($this->currencyToMoneyAmount, $currency->name, 1);
+        unset($this->currencyToMoneyAmount[$currency->name], $this->currencyToClass[$currency->name]);
+
         return;
     }
 
+    /**
+     * @param Currency $currency
+     * @return void
+     */
     public function setMainCurrency(CurrencyModel $currency): void
     {
         $this->currency = $currency;
         return;
     }
 
+    /**
+     * @return string
+     */
     public function getMainCurrency(): string
     {
         return $this->currency->name;
     }
 
+    /**
+     * @return array
+     */
     public function getAllCurrencies(): array
     {
         return array_keys($this->currencyToMoneyAmount);
     }
 
+    /**
+     * @param Currency $currency
+     * @return void
+     */
     public function deposit(CurrencyModel $currency): void
     {
         $currencyDeposit = $currency->name;
@@ -84,18 +126,50 @@ class Account
         return;
     }
 
+    /**
+     * @param Currency|null $currency
+     * @return string
+     * @throws BaseCurrencyNotSet
+     * @throws CurrencyDoesNotExistInAccountException
+     */
     public function getDeposit(null|CurrencyModel $currency = null): string
     {
-        $getCurrency = $this->currency;
-        if (!is_null($currency)) {
-            $getCurrency = $currency;
+        if (is_null($this->currency) && is_null($currency)) {
+            throw new BaseCurrencyNotSet();
         }
-        $this->checkCurrencyExist($getCurrency);
 
-        return $this->currencyToMoneyAmount[$getCurrency->name];
+        $getDepositCurrency = $this->currency;
+
+        if (!is_null($currency)) {
+            $getDepositCurrency = $currency;
+        }
+
+        $this->checkCurrencyExist($getDepositCurrency);
+
+        if (is_null($currency)) {
+            $currencies = $this->getAllCurrencies();
+            unset($currencies[array_flip($currencies)[$this->currency->name]]);
+            $amount = (float)$this->currencyToMoneyAmount[$this->currency->name];
+
+            foreach ($currencies as $currencyItem) {
+                $currencyObj = new $this->currencyToClass[$currencyItem]($this->currencyToMoneyAmount[$currencyItem]);
+                $toCurrency = new $this->currencyToClass[$this->currency->name]($currencyObj);
+                $amount += $toCurrency->value;
+            }
+            return (string)$amount;
+        }
+
+        return $this->currencyToMoneyAmount[$getDepositCurrency->name];
     }
 
-    public function withdraw(CurrencyModel $currency): void
+    /**
+     * @param Currency $currency
+     * @return Currency
+     * @throws AmountWithdrawShouldNotZeroException
+     * @throws CurrencyDoesNotExistInAccountException
+     * @throws InsufficientFundsException
+     */
+    public function withdraw(CurrencyModel $currency): CurrencyModel
     {
         $this->checkCurrencyExist($currency);
 
@@ -111,8 +185,14 @@ class Account
         }
 
         $this->currencyToMoneyAmount[$currency->name] = (string)((float)$deposit - (float)$withdrawAmount);
+        return $currency;
     }
 
+    /**
+     * @param Currency $currency
+     * @return void
+     * @throws CurrencyDoesNotExistInAccountException
+     */
     private function checkCurrencyExist(CurrencyModel $currency): void
     {
         if (!isset($this->currencyToMoneyAmount[$currency->name])) {

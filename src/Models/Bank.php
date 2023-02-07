@@ -11,32 +11,18 @@ use App\Enums\Currency as CurrencyEnum;
 class Bank
 {
 
+    /**
+     * @var array
+     */
     private array $accounts = [
 
     ];
 
-//    public array $exchangeRates = [
-//        CurrencyEnum::USD . "/" . CurrencyEnum::RUB => 100,
-//        CurrencyEnum::USD . "/" . CurrencyEnum::EUR => 1.1,
-//        CurrencyEnum::EUR . "/" . CurrencyEnum::RUB => 110,
-//        CurrencyEnum::EUR . "/" . CurrencyEnum::USD => 1.1,
-//        CurrencyEnum::RUB . "/" . CurrencyEnum::USD => 0.01,
-//        CurrencyEnum::RUB . "/" . CurrencyEnum::EUR => 0.01,
-//    ];
-//
-//
-//    public function setExchange(CurrencyModel $fc, CurrencyModel $sc, float $rate): void
-//    {
-//        $key = $fc->name . '/' . $sc->name;
-//        if (!isset($this->exchangeRates[$key])) {
-//            throw new CurrencyPairDoesNotExistException();
-//        }
-//
-//        $this->exchangeRates[$key] = $rate;
-//        return;
-//    }
 
-
+    /**
+     * @param Customer $customer
+     * @return Account
+     */
     public function createAccount(CustomerModel $customer): AccountModel
     {
         $account = new AccountModel($customer);
@@ -44,6 +30,10 @@ class Bank
         return $account;
     }
 
+    /**
+     * @param Customer $customer
+     * @return array
+     */
     public function getAllAccountUser(CustomerModel $customer): array
     {
         return $this->accounts[$customer->id];
