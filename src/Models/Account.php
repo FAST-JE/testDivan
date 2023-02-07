@@ -132,28 +132,26 @@ class Account
             throw new BaseCurrencyNotSet();
         }
 
-        $getDepositCurrency = $this->currency;
-
         if (!is_null($currency)) {
-            $getDepositCurrency = $currency;
+            $this->checkCurrencyExist($currency);
+            return $this->currencyToMoneyAmount[$currency->name];
         }
 
-        $this->checkCurrencyExist($getDepositCurrency);
+        return $this->getDepositDefault();
+    }
 
-        if (is_null($currency)) {
-            $currencies = $this->getAllCurrencies();
-            unset($currencies[array_flip($currencies)[$this->currency->name]]);
-            $amount = (float)$this->currencyToMoneyAmount[$this->currency->name];
+    private function getDepositDefault(): string
+    {
+        $currencies = $this->getAllCurrencies();
+        unset($currencies[array_flip($currencies)[$this->currency->name]]);
+        $amount = (float)$this->currencyToMoneyAmount[$this->currency->name];
 
-            foreach ($currencies as $currencyItem) {
-                $currencyObj = new $this->currencyToClass[$currencyItem]($this->currencyToMoneyAmount[$currencyItem]);
-                $toCurrency = new $this->currencyToClass[$this->currency->name]($currencyObj);
-                $amount += $toCurrency->value;
-            }
-            return (string)$amount;
+        foreach ($currencies as $currencyItem) {
+            $currencyObj = new $this->currencyToClass[$currencyItem]($this->currencyToMoneyAmount[$currencyItem]);
+            $toCurrency = new $this->currencyToClass[$this->currency->name]($currencyObj);
+            $amount += $toCurrency->value;
         }
-
-        return $this->currencyToMoneyAmount[$getDepositCurrency->name];
+        return (string)$amount;
     }
 
     /**
