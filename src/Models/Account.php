@@ -140,6 +140,9 @@ class Account
         return $this->getDepositDefault();
     }
 
+    /**
+     * @return string
+     */
     private function getDepositDefault(): string
     {
         $currencies = $this->getAllCurrencies();
