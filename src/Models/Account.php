@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Exceptions\AmountWithdrawShouldNotZeroException;
 use App\Exceptions\BaseCurrencyNotSet;
 use App\Exceptions\CurrencyDoesNotExistInAccountException;
-use App\Exceptions\CurrencyExistInAccountException;
 use App\Exceptions\CurrencyRemoveException;
 use App\Exceptions\InsufficientFundsException;
 use App\Models\Customer as CustomerModel;
@@ -55,7 +54,6 @@ class Account
         if (!in_array($currency->name, $this->currencyToClass, true)) {
             $this->currencyToClass[$currency->name] = $currency::class;
         }
-        return;
     }
 
     /**
@@ -78,8 +76,6 @@ class Account
 
         $this->currencyToMoneyAmount[$this->currency->name] = (string)((float)$this->currencyToMoneyAmount[$this->currency->name] + (float)$toCurrency->value);
         unset($this->currencyToMoneyAmount[$currency->name], $this->currencyToClass[$currency->name]);
-
-        return;
     }
 
     /**
@@ -115,15 +111,13 @@ class Account
     public function deposit(CurrencyModel $currency): void
     {
         $currencyDeposit = $currency->name;
-        $valueDeposit = $currency->value;
+        $valueDeposit = (float)$currency->value;
 
         if (isset($this->currencyToMoneyAmount[$currencyDeposit])) {
-            $this->currencyToMoneyAmount[$currencyDeposit] = (string)((float)$this->currencyToMoneyAmount[$currencyDeposit] + (float)$valueDeposit);
+            $this->currencyToMoneyAmount[$currencyDeposit] = (string)((float)$this->currencyToMoneyAmount[$currencyDeposit] + $valueDeposit);
         } else {
             $this->currencyToMoneyAmount[$currencyDeposit] = $valueDeposit;
         }
-
-        return;
     }
 
     /**
@@ -184,7 +178,7 @@ class Account
             throw new InsufficientFundsException();
         }
 
-        $this->currencyToMoneyAmount[$currency->name] = (string)((float)$deposit - (float)$withdrawAmount);
+        $this->currencyToMoneyAmount[$currency->name] = (string)($deposit - $withdrawAmount);
         return $currency;
     }
 
@@ -198,7 +192,5 @@ class Account
         if (!isset($this->currencyToMoneyAmount[$currency->name])) {
             throw new CurrencyDoesNotExistInAccountException();
         }
-
-        return;
     }
 }

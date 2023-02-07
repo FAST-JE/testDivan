@@ -41,7 +41,6 @@ class Currency
             throw new CurrencyPairDoesNotExistException();
 
         $this->exchangeRates[$currency->name] = $rate;
-        return;
     }
 
     /**
