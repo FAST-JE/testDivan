@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\Currency as CurrencyEnum;
@@ -21,6 +23,6 @@ class RUB extends Currency
             $amount = $this->convertTo($value);
         }
 
-        $this->value = (string)$amount;
+        $this->setValue($amount);
     }
 }

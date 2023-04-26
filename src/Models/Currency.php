@@ -1,54 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Exceptions\CurrencyPairDoesNotExistException;
 
 class Currency
 {
-    /**
-     * @var string
-     */
-    public string $name = '';
-    /**
-     * @var string
-     */
-    public string $value = '';
-    /**
-     * @var array
-     */
-    public array $exchangeRates = [];
+    public string $name;
+    public float $value;
+    protected array $exchangeRates = [];
 
-    /**
-     * @param string $value
-     * @return void
-     */
-    public function setValue(string $value): void
+    public function setValue(float $value): void
     {
         $this->value = $value;
-        return;
     }
 
-    /**
-     * @param Currency $currency
-     * @param float $rate
-     * @return void
-     * @throws CurrencyPairDoesNotExistException
-     */
+    public function getValue(): float
+    {
+        return $this->value;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function setExchange(Currency $currency, float $rate): void
     {
-        if (!isset($this->exchangeRates[$currency->name]))
+        if (!isset($this->exchangeRates[$currency->getName()])) {
             throw new CurrencyPairDoesNotExistException();
+        }
 
-        $this->exchangeRates[$currency->name] = $rate;
+        $this->exchangeRates[$currency->getName()] = $rate;
     }
 
-    /**
-     * @param Currency $currency
-     * @return string
-     */
-    protected function convertTo(Currency $currency): string
+    protected function convertTo(Currency $currency): float
     {
-        return (string)((float)$currency->value * (float)$this->exchangeRates[$currency->name]);
+        return $currency->getValue() * $this->exchangeRates[$currency->getName()];
     }
 }

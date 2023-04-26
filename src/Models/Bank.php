@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Exceptions\CurrencyPairDoesNotExistException;
@@ -11,18 +13,10 @@ use App\Enums\Currency as CurrencyEnum;
 class Bank
 {
 
-    /**
-     * @var array
-     */
     private array $accounts = [
 
     ];
 
-
-    /**
-     * @param Customer $customer
-     * @return Account
-     */
     public function createAccount(CustomerModel $customer): AccountModel
     {
         $account = new AccountModel($customer);
@@ -30,10 +24,6 @@ class Bank
         return $account;
     }
 
-    /**
-     * @param Customer $customer
-     * @return array
-     */
     public function getAllAccountUser(CustomerModel $customer): array
     {
         return $this->accounts[$customer->id];

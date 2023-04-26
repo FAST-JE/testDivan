@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
@@ -43,24 +45,24 @@ class AccountModelTest extends TestCase
 
     public function testCheckDeposit(): void
     {
-        $this->assertEquals('11500', $this->account->getDeposit());
-        $this->assertEquals('1000', $this->account->getDeposit(new RUBModel));
-        $this->assertEquals('50', $this->account->getDeposit(new USDModel));
-        $this->assertEquals('50', $this->account->getDeposit(new EURModel));
+        $this->assertEquals(11500, $this->account->getDeposit());
+        $this->assertEquals(1000, $this->account->getDeposit(new RUBModel));
+        $this->assertEquals(50, $this->account->getDeposit(new USDModel));
+        $this->assertEquals(50, $this->account->getDeposit(new EURModel));
     }
 
     public function testCheckWithdraw(): void
     {
         $this->account->withdraw(new USDModel(10));
 
-        $this->assertEquals('40', $this->account->getDeposit(new USDModel));
+        $this->assertEquals(40, $this->account->getDeposit(new USDModel));
     }
 
     public function testChangeMainCurrency(): void
     {
         $this->account->setMainCurrency(new EURModel);
 
-        $this->assertEquals('115', $this->account->getDeposit());
+        $this->assertEquals(115, $this->account->getDeposit());
     }
 
     public function testWithdrawAndConvert(): void
@@ -69,7 +71,7 @@ class AccountModelTest extends TestCase
         $amountWithdraw = $this->account->withdraw(new RUBModel(1000));
         $this->account->deposit(new EURModel($amountWithdraw));
 
-        $this->assertEquals('115', $this->account->getDeposit());
+        $this->assertEquals(115, $this->account->getDeposit());
     }
 
     public function testRemoveCurrencies(): void
@@ -78,6 +80,6 @@ class AccountModelTest extends TestCase
         $this->account->removeCurrency(new EURModel());
         $this->account->removeCurrency(new USDModel());
 
-        $this->assertEquals('11500', $this->account->getDeposit());
+        $this->assertEquals(11500, $this->account->getDeposit());
     }
 }
